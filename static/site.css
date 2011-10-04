@@ -1,0 +1,50 @@
+body {
+    color: #202020;
+}
+
+.answer_0 {
+    color: green;
+}
+
+.answer_1 {
+    color: red;
+}
+
+.answer_2 {
+    color: purple;
+}
+
+.answer_3 {
+    color: olive;
+}
+
+.answer_4 {
+    color: orange;
+}
+
+.answer_5 {
+    color: fuschia;
+}
+
+.answer_inconclusive {
+    color: goldenrod;
+    font-style: italic;
+}
+
+.tip {
+    color: #999;
+    display: block;
+    font-size: .9em;
+}
+
+.jobnotrun {
+    color: red;
+}
+
+.resultsready {
+    color: green;
+}
+
+.resultspending {
+    color: goldnerod;
+}

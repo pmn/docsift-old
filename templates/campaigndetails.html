@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {{ campaign.title }}
+{% endblock %}
+
+{% block content %}
+<h3>{{ campaign.title }}</h3>
+
+<div>
+  <h5>This campaign will cost ${{ "%.2f"|format(campaign.cost()) }}</h5>
+  ({{ campaign.terms|count }} terms run {{ campaign.times_per_term }} times, {{ campaign.terms_per_quiz }} terms per quiz; 
+  at a cost of ${{ "%.2f"|format(campaign.reward_per_quiz) }} per quiz.)
+</div>
+
+{% if campaign.job_generated == False %}
+<div class="well">
+  <form method="POST" action="/campaigns/{{ campaign.id }}/generate">
+    <input type="submit" class="btn primary" value="Generate jobs!" />
+  </form>
+</div>
+{% elif campaign.answers|count == 0 %}
+<div class="well">
+  <form method="POST" action="/fetchresults">
+    <input type="submit" class="btn primary" value="Fetch campaign results" />
+  </form>
+</div>
+{% endif %}
+
+<hr />
+
+<div>
+  <b>Question:</b>
+  <h3>{{ campaign.question }}</h3>
+</div>
+<div>
+  <b>{{ campaign.options|count }} Possible answers:</b></br>
+  <ul>
+  {% for option in campaign.options %}
+  <li><span class="answer_{{ option.id - firstoptionid}}"><strong>{{ option.option_text }}</strong></span></li>
+  {% endfor %}
+  </ul>
+</div>
+
+<b>Terms:</b> 
+{% if campaign.job_generated == True %}
+(Download <a href="/campaigns/{{ campaign.id }}.csv">.csv</a> 
+<a href="/campaigns/{{ campaign.id }}.json">.json</a>)
+{% endif %}
+<ul>
+{% for result in resultset %}
+<li> {{ result.term }}
+  {% if campaign.job_generated == True %}
+  :
+  {% if result.answer.option_text != "Inconclusive" %}
+  <span class="answer_{{ result.answer.option_id - firstoptionid }}">
+    {{ result.answer.option_text }}
+  </span>
+  ({{ result.answer.percentage }}% of votes)
+  {% else %}
+  <span class="answer_inconclusive">Inconclusive => {{ result.answer_breakdown() }}</span>
+  {% endif %}
+  {% endif %}
+</li>
+{% endfor %}
+</ul>
+
+<div class="well">
+  <a href="/campaigns/{{ campaign.id }}/delete" class="btn error">Delete this campaign</a>
+</div>
+{% endblock %}

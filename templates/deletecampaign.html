@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}
+Delete {{ campaign.title }}?
+{% endblock %}
+
+{% block content %}
+<h3>Delete the campaign <em>"{{ campaign.title }}"</em>?</h3>
+<p>&nbsp;</p>
+
+<form method="POST">
+<input type="submit" value="Confirm Deletion" class="btn danger"/>
+</form>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}
+Campaigns
+{% endblock %}
+
+{% block content %}
+<table class="zebra-striped">
+  <tr>
+    <th>Name</th>
+    <th>Question</th>
+    <th># of terms</th>
+    <th>Created at</th>
+    <th>Status</th>
+    <th></th>
+  </tr>
+  {% for campaign in campaigns %}
+  <tr>
+    <td><a href="/campaigns/{{ campaign.id }}">{{ campaign.title }}</a></td>
+    <td>{{ campaign.question }}</td>
+    <td>{{ campaign.terms|count }}</td>
+    <td>{{ campaign.created_date.strftime('%Y-%m-%d') }}</td>
+    <td>
+      {% if campaign.job_generated == False %}
+      <span class="jobnotrun">not started</span>
+      {% elif campaign.answers|count > 0 %}
+      <span class="resultsready">results ready</span>
+      {% else %}
+      <span class="resultspending">results pending</span>
+      {% endif %}
+    </td>
+    <td><a href="/campaigns/{{ campaign.id }}/delete">delete?</a></td>
+  </tr>
+  {% endfor %}
+</table>
+<div class="well">
+  <form method="post" action="/fetchresults">
+    <a href="/campaigns/new" class="btn primary">Add a campaign</a> 
+    {% if pending_jobs == True %}
+    <input type="submit" class="btn success" value="Fetch results" />
+    {% endif %}
+  </form>
+</div>
+{% endblock %}

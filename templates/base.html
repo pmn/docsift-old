@@ -1,0 +1,31 @@
+<html>
+<head>
+  <title>{% block title %}{% endblock %} | docsift </title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='reset.css')}}" type="text/css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.css')}}" type="text/css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='site.css') }}" type="text/css" />
+</head>
+<body>
+  <div class="container">
+    <div id="header">
+      <h1><a href="/">docsift</a></h1>
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      <div class="alert-message block-message warning">
+	<ul class="flashes">
+	  {% for message in messages %}
+	  <li>{{ message }}</li>
+	  {% endfor %}
+	</ul>
+      </div>
+      {% endif %}
+      {% endwith %}
+    </div>
+    <div id="content">
+      {% block content %} 
+        Nothing to see here...
+      {% endblock %}
+    </div>
+  </div>
+</body>
+</html>
