@@ -9,7 +9,6 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = settings.DATABASE_URI
 db = SQLAlchemy(app)
 
-
 class Campaign(db.Model):
     """
     The categorization campaign.
@@ -65,7 +64,7 @@ class Campaign(db.Model):
             bestanswer_count = answers[bestanswer]
             bestanswer_percent = (bestanswer_count / float(self.times_per_term) * 100)
 
-            if bestanswer_percent < 75:
+            if bestanswer_percent < settings.THRESHOLD:
                 # If the required threshold hasn't been met, there is no real best answer
                 bestanswer = ""
 
@@ -173,14 +172,15 @@ class CampaignResult():
     """
     def answer_breakdown(self):
         """
-        pmn: xxmmqq: can this be deleted?
+        Create a breakdown of answer selections for use in the 
+        summary view of the campaign.
         """
         out = ""
         for result in self.results:
             out += "%s: %s%% " % (result.option_text, result.percentage)
         return out
 
-    def choose_answer(self, threshold=75):
+    def choose_answer(self, threshold=settings.THRESHOLD):
         """
         Select the most frequently chosen answer.
         """

@@ -13,7 +13,7 @@ class NewCampaignForm(Form):
                                 validators=[NumberRange(min=0, max=50, 
                                             message='Specify fewer than 50 terms per quiz')])
     reward = DecimalField('How much to reward per quiz?', 
-                          validators=[NumberRange(min=0.009, max=5.00, 
+                          validators=[NumberRange(min=0.01, max=5.00, 
                                       message='Reward should be between .01 and 5.00')])
     times_per_term = IntegerField('How many times should each quiz be presented?',
                                     validators=[NumberRange(min=1,max=50)]) 
