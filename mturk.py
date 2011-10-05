@@ -1,6 +1,7 @@
 # API for working with Amazon Mechanical Turk
 from boto.mturk.connection import MTurkConnection
 from boto.mturk.question import QuestionContent, Question, QuestionForm, Overview, AnswerSpecification, SelectionAnswer
+from boto.mturk.qualification import LocaleRequirement, Qualifications
 
 from models import db, Campaign, CampaignOption, CampaignTerm, CampaignAnswer
 import settings
@@ -80,12 +81,19 @@ def create_campaign_hits(campaignid):
                                                      questiontext,
                                                      answers))
   
+        # Create a locale requirement that answerers must be in the US
+        qualifications = Qualifications()
+        lr = LocaleRequirement("EqualTo","US")
+        qualifications.add(lr)
+        print lr.get_as_params()
+
         # Now that the questions have been added, create the HIT
         conn.create_hit(questions=question_form,
                         max_assignments=campaign.times_per_term,
                         title=campaign.title,
                         description=campaign.title,
                         duration=60*5, # allot 5 minutes per quiz 
+                        qualifications=qualifications, # require the answerers be in the US
                         reward=campaign.reward_per_quiz)
 
     # Update the campaign to prevent multiple generation attempts
