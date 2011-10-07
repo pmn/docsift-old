@@ -9,6 +9,23 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = settings.DATABASE_URI
 db = SQLAlchemy(app)
 
+class ActionLog(db.Model):
+    """ 
+    Logging for activities on the site.
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    log_time = db.Column(db.DateTime)
+    log_source = db.Column(db.String(50))
+    log_message = db.Column(db.String(2000))
+
+    def __init__(self, source, message):
+        self.log_time = datetime.utcnow()
+        self.log_source = source
+        self.log_message = message
+
+    def __repr__(self):
+        return "<Event: %s in %s at %s>" % (self.log_message, self.log_source, self.log_message)
+
 class Campaign(db.Model):
     """
     The categorization campaign.

@@ -10,6 +10,7 @@ Campaigns
     <th>Name</th>
     <th>Question</th>
     <th># of terms</th>
+    <th># of runs</th>
     <th>Created at</th>
     <th>Status</th>
     <th></th>
@@ -19,14 +20,16 @@ Campaigns
     <td><a href="/campaigns/{{ campaign.id }}">{{ campaign.title }}</a></td>
     <td>{{ campaign.question }}</td>
     <td>{{ campaign.terms|count }}</td>
+    <td>{{ campaign.times_per_term }}</td>
     <td>{{ campaign.created_date.strftime('%Y-%m-%d') }}</td>
     <td>
       {% if campaign.job_generated == False %}
       <span class="jobnotrun">not started</span>
-      {% elif campaign.answers|count > 0 %}
+      {% elif campaign.answers|count == campaign.terms|count * campaign.times_per_term %}
       <span class="resultsready">results ready</span>
       {% else %}
-      <span class="resultspending">results pending</span>
+      <span class="resultspending">in progress 
+	({{ campaign.answers|count }} / {{ campaign.terms|count * campaign.times_per_term }})</span>
       {% endif %}
     </td>
     <td><a href="/campaigns/{{ campaign.id }}/delete">delete?</a></td>

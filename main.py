@@ -32,7 +32,8 @@ def listcampaigns():
     # Report whether or not there are jobs pending
     pending_jobs = False
     for campaign in campaigns:
-        if (campaign.job_generated == True) and (len(campaign.answers) == 0):
+        num_answers_expected = len(campaign.terms) * campaign.times_per_term
+        if (campaign.job_generated == True) and (len(campaign.answers) < num_answers_expected):
             pending_jobs = True
 
     return render_template('campaignlist.html', campaigns=campaigns, pending_jobs=pending_jobs)
@@ -158,7 +159,7 @@ def generatecampaign(id):
     flash("Mechanical Turk campaign created!")
     return redirect(url_for('listcampaigns'))
 
-@app.route('/fetchresults', methods=['POST'])
+@app.route('/fetchresults', methods=['GET', 'POST'])
 def fetchresults():
     if retrieve_reviewable_hits() == False:
         flash("There were no results, wait a few minutes and try again")

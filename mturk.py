@@ -3,9 +3,11 @@ from boto.mturk.connection import MTurkConnection
 from boto.mturk.question import QuestionContent, Question, QuestionForm, Overview, AnswerSpecification, SelectionAnswer
 from boto.mturk.qualification import LocaleRequirement, Qualifications
 
-from models import db, Campaign, CampaignOption, CampaignTerm, CampaignAnswer
+from models import db, ActionLog, Campaign, CampaignOption, CampaignTerm, CampaignAnswer
+import cgi
 import settings
 import math
+import sys
 
 ### HIT Creation ###
 def create_connection():
@@ -73,10 +75,12 @@ def create_campaign_hits(campaignid):
             if termnum < len(terms):
                 term = terms[termnum]
                 # Build up an answer dictionary for use with the question form 
-                answers = [(option.option_text, option.id) for option in options]
+                answers = [(cgi.escape(option.option_text), 
+                            ("%s|%s" % (option.id, cgi.escape(option.option_text)))) 
+                           for option in options]
                 # A question should be appended for each term under consideration
-                questiontext = campaign.question.replace("[term]", term.term)
-                identifier = "%s|%s" % (campaign.id, term.id)
+                questiontext = campaign.question.replace("[term]", cgi.escape(term.term))
+                identifier = "%s|%s|%s" % (campaign.id, term.id, cgi.escape(term.term))
                 question_form.append(create_question(identifier,
                                                      questiontext,
                                                      answers))
@@ -128,27 +132,47 @@ def retrieve_reviewable_hits():
             # of each question (as multiple questions can be attached
             # to a single assignment).
             for answer in assignment.answers[0]:
-                for identifier, optionid in answer.fields:
+                for identifier, optionfield in answer.fields:
                     # Record the answer in the database
-                    campaignid, termid = identifier.split("|")
-                    answer = CampaignAnswer(hit.HITId, 
-                                            assignment.WorkerId,
-                                            campaignid,
-                                            termid,
-                                            optionid)
-                    db.session.add(answer)
-                    results_returned = True
+                    campaignid, termid, _ = identifier.split("|")
+                    optionid, _ = optionfield.split("|")
+                    ans_count = CampaignAnswer.query.filter_by(hit=hit.HITId,
+                                                                     worker=assignment.WorkerId,
+                                                                     campaign_id=campaignid,
+                                                                     term_id=termid,
+                                                                     option_id=optionid).count()
+                    if ans_count == 0:
+                        answer = CampaignAnswer(hit.HITId, 
+                                                assignment.WorkerId,
+                                                campaignid,
+                                                termid,
+                                                optionid)
+                        db.session.add(answer)
+
+                        logitem = ActionLog("retrieve_reviewable_hits::answerloop",
+                                            "campaign: %s, term: %s, option: %s" % 
+                                            (campaignid, termid, optionid))
+                        db.session.add(logitem)
+                        results_returned = True
+ 
     # Save answers to the database
     db.session.commit()
 
     # Process the HIT approvals to prevent multiple attempts to save
-    if len(hits) > 0:
+    # Only do this if there were valid results returned
+    if (len(hits) > 0) and (results_returned == True):
         for hit in hits:
             assignments = connection.get_assignments(hit.HITId)
             for assignment in assignments:
-                # Right now this is approving everything; that's probably
-                # not going to be the correct behavior in the long term.
-                connection.approve_assignment(assignment.AssignmentId)
-            # Now that the assignments have been handled, disable the HIT
-            connection.disable_hit(hit.HITId)
+                try:
+                    # Right now this is approving everything; that's probably
+                    # not going to be the correct behavior in the long term.
+                    connection.approve_assignment(assignment.AssignmentId)
+                    logitem = ActionLog("approve_assignment",
+                                        "HITId: %s, AssignmentId: %s" % (hit.HITId, assignment.AssignmentId))
+                    db.session.add(logitem)
+                except:
+                    logitem = ActionLog("approve_assignment - failed",
+                                        "HITId: %s, AssignmentId: %s, error: %s" %
+                                        (hit.HITId, assignment.AssignmentId, sys.exc_info()[0]))
     return results_returned
