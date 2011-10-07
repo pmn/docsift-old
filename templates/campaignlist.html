@@ -21,8 +21,8 @@ Campaigns
     <td>{{ campaign.question }}</td>
     <td>{{ campaign.terms|count }}</td>
     <td>{{ campaign.times_per_term }}</td>
-    <td>{{ campaign.created_date.strftime('%Y-%m-%d') }}</td>
-    <td>
+    <td nowrap>{{ campaign.created_date.strftime('%Y-%m-%d') }}</td>
+    <td nowrap>
       {% if campaign.job_generated == False %}
       <span class="jobnotrun">not started</span>
       {% elif campaign.answers|count == campaign.terms|count * campaign.times_per_term %}

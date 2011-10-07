@@ -33,37 +33,42 @@
   <b>Question:</b>
   <h3>{{ campaign.question }}</h3>
 </div>
-<div>
-  <b>{{ campaign.options|count }} Possible answers:</b></br>
-  <ul>
-  {% for option in campaign.options %}
-  <li><span class="answer_{{ option.id - firstoptionid}}"><strong>{{ option.option_text }}</strong></span></li>
-  {% endfor %}
-  </ul>
-</div>
 
-<b>Terms:</b> 
-{% if campaign.job_generated == True %}
-(Download <a href="/campaigns/{{ campaign.id }}.csv">.csv</a> 
-<a href="/campaigns/{{ campaign.id }}.json">.json</a>)
-{% endif %}
-<ul>
-{% for result in resultset %}
-<li> {{ result.term }}
-  {% if campaign.job_generated == True %}
-  :
-  {% if result.answer.option_text != "Inconclusive" %}
-  <span class="answer_{{ result.answer.option_id - firstoptionid }}">
-    {{ result.answer.option_text }}
-  </span>
-  ({{ result.answer.percentage }}% of votes)
-  {% else %}
-  <span class="answer_inconclusive">Inconclusive => {{ result.answer_breakdown() }}</span>
-  {% endif %}
-  {% endif %}
-</li>
-{% endfor %}
-</ul>
+<div class="row">
+  <div class="span-one-third">
+    <b>{{ campaign.options|count }} Possible answers:</b></br>
+    <ul>
+      {% for option in campaign.options %}
+      <li><span class="answer_{{ option.id - firstoptionid}}"><strong>{{ option.option_text }}</strong></span></li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="span-two-thirds">
+    <b>Terms:</b> 
+    {% if campaign.job_generated == True %}
+    (Download <a href="/campaigns/{{ campaign.id }}.csv">.csv</a> 
+    <a href="/campaigns/{{ campaign.id }}.json">.json</a>)
+    {% endif %}
+    <ul>
+      {% for result in resultset %}
+      <li> {{ result.term }}
+	{% if campaign.job_generated == True %}
+	:
+	{% if result.answer.option_text != "Inconclusive" %}
+	<span class="answer_{{ result.answer.option_id - firstoptionid }}">
+	  {{ result.answer.option_text }}
+	</span>
+	({{ result.answer.percentage }}% of votes)
+	{% else %}
+	<span class="answer_inconclusive">Inconclusive => {{ result.answer_breakdown() }}</span>
+	{% endif %}
+	{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
 
 <div class="well">
   <a href="/campaigns/{{ campaign.id }}/delete" class="btn error">Delete this campaign</a>
