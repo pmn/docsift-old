@@ -16,7 +16,7 @@ def create_connection():
     """
     mtc = MTurkConnection(aws_access_key_id=settings.AWS_ACCESS_ID,
                       aws_secret_access_key=settings.AWS_SECRET_KEY,
-                      host=settings.TURK_TEST_HOST)
+                      host=settings.TURK_HOST)
     return mtc
 
 def build_answers(answerlist):
@@ -96,7 +96,7 @@ def create_campaign_hits(campaignid):
                         max_assignments=campaign.times_per_term,
                         title=campaign.title,
                         description=campaign.title,
-                        duration=60*5, # allot 5 minutes per quiz 
+                        duration=60*30, # allot 30 minutes per quiz 
                         qualifications=qualifications, # require the answerers be in the US
                         reward=campaign.reward_per_quiz)
 
