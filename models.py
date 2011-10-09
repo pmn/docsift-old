@@ -15,7 +15,7 @@ class ActionLog(db.Model):
     """
     id = db.Column(db.Integer, primary_key=True)
     log_time = db.Column(db.DateTime)
-    log_source = db.Column(db.String(50))
+    log_source = db.Column(db.String(100))
     log_message = db.Column(db.String(2000))
 
     def __init__(self, source, message):
@@ -196,6 +196,17 @@ class CampaignResult():
         for result in self.results:
             out += "%s: %s%% " % (result.option_text, result.percentage)
         return out
+
+    def is_inconclusive(self, threshold=settings.THRESHOLD):
+        """
+        Return True if the result is inconclusive, otherwise return False.
+        """
+        print "testing conclusiveness"
+        inconclusive = True
+        for result in self.results:
+            if result.percentage > threshold:
+                inconclusive = False
+        return inconclusive
 
     def choose_answer(self, threshold=settings.THRESHOLD):
         """

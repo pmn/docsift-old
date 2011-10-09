@@ -94,6 +94,79 @@ def campaigndetails(id):
                            firstoptionid=firstoptionid,
                            resultset=campaign.get_results())
 
+@app.route('/campaigns/<id>/clone', methods=['GET', 'POST'])
+def clonecampaign(id):
+    """
+    Clone a campaign from an existing campaign
+    """
+    campaign = Campaign.query.filter_by(id=id).first_or_404()
+    form = NewCampaignForm(request.form, obj=campaign)
+
+    allterms = [str(term.term) for term in campaign.terms]
+
+    results = campaign.get_results()
+    inconclusiveterms = [str(answer.term) for answer in results if answer.is_inconclusive()]
+
+    if request.method == 'POST' and form.validate():
+        # Add the campaign itself
+        campaign = Campaign(form.title.data, 
+                            form.question.data, 
+                            form.terms_per_quiz.data, 
+                            form.reward.data, 
+                            form.times_per_term.data)
+        db.session.add(campaign)
+
+        # Add the options 
+        options = re.split(r'[\n\r]+', form.options.data)
+        for option in options:
+            if len(option) > 0:
+                campaign_option = CampaignOption(campaign, option)
+                db.session.add(campaign_option)
+
+        # Add the terms
+        terms = re.split(r'[\n\r]+', form.terms.data)
+        for term in terms:
+            if len(term) > 0:
+                campaign_term = CampaignTerm(campaign, term)
+                db.session.add(campaign_term)
+
+        # Save everything to the db
+        db.session.commit()
+        return redirect(url_for('campaigndetails',id=campaign.id))
+
+    return render_template('clonecampaign.html',
+                           original_campaign=campaign,
+                           allterms=allterms,
+                           inconclusiveterms=inconclusiveterms,
+                           form=form)
+
+@app.route('/campaigns/<id>/delete', methods=['GET','POST'])
+def deletecampaign(id):
+    """
+    Delete an existing campaign. 
+
+    Because campaigns are tied to MTurk jobs, jobs will need to be cancelled where
+    possible when the campaign is deleted (otherwise there will be jobs running 
+    and the results will never be collected, wasting money).
+    """
+    campaign = Campaign.query.filter_by(id=id).first_or_404()
+    if request.method == 'POST':
+        campaignname = campaign.title
+        db.session.delete(campaign)
+        db.session.commit()
+        flash('Campaign "%s" was deleted!' % campaignname)
+        return redirect(url_for('listcampaigns'))
+    return render_template('deletecampaign.html', campaign=campaign)
+
+@app.route('/campaigns/<id>/generate', methods=['POST'])
+def generatecampaign(id):
+    """
+    Generate MTurk jobs for the campaign represented by 'id'
+    """
+    create_campaign_hits(id)
+    flash("Mechanical Turk campaign created!")
+    return redirect(url_for('listcampaigns'))
+
 @app.route('/campaigns/<id>.<filetype>')
 def downloadresults(id, filetype):
     """
@@ -132,38 +205,14 @@ def downloadresults(id, filetype):
         return "Unknown filetype."
      
 
-@app.route('/campaigns/<id>/delete', methods=['GET','POST'])
-def deletecampaign(id):
-    """
-    Delete an existing campaign. 
-
-    Because campaigns are tied to MTurk jobs, jobs will need to be cancelled where
-    possible when the campaign is deleted (otherwise there will be jobs running 
-    and the results will never be collected, wasting money).
-    """
-    campaign = Campaign.query.filter_by(id=id).first_or_404()
-    if request.method == 'POST':
-        campaignname = campaign.title
-        db.session.delete(campaign)
-        db.session.commit()
-        flash('Campaign "%s" was deleted!' % campaignname)
-        return redirect(url_for('listcampaigns'))
-    return render_template('deletecampaign.html', campaign=campaign)
-
-@app.route('/campaigns/<id>/generate', methods=['POST'])
-def generatecampaign(id):
-    """
-    Generate MTurk jobs for the campaign represented by 'id'
-    """
-    create_campaign_hits(id)
-    flash("Mechanical Turk campaign created!")
-    return redirect(url_for('listcampaigns'))
-
 @app.route('/fetchresults', methods=['GET', 'POST'])
 def fetchresults():
     if retrieve_reviewable_hits() == False:
         flash("There were no results, wait a few minutes and try again")
     return redirect(url_for('listcampaigns'))
+
+
+
 
 ### Application settings ###
 app.secret_key = settings.APP_SECRET_KEY

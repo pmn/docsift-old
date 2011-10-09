@@ -48,3 +48,17 @@ body {
 .resultspending {
     color: goldenrod;
 }
+
+.toolrow {
+    display: block;
+    color: #999;
+}
+
+.toolrow a {
+    font-weight: bold;
+}
+
+.errors {
+    color: red;
+    font-style: italic;
+}

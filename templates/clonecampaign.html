@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}
+Clone campaign - {{ original_campaign.title }}
+{% endblock %}
+
+{% block content %}
+<h3>Clone "{{ original_campaign.title }}"</h3>
+<form method="POST" class="form-stacked">
+  {{ form.title.label }}
+  {{ form.title(class="xxlarge") }}
+    {% if form.title.errors %}
+  <ul class="errors">
+    {% for error in form.title.errors %}
+    <li>{{ error }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  {{ form.question.label }}
+  {{ form.question(class="xxlarge") }}
+  {% if form.question.errors %}
+  <ul class="errors">
+    {% for error in form.question.errors %}
+    <li>{{ error }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  <label for="options">Answers, separated by newlines</label>
+  <textarea class="xxlarge" id="options" name="options" rows="5">
+{% for option in original_campaign.options %}{{ option.option_text }}
+{% endfor %}</textarea>
+  {% if form.options.errors %}
+  <ul class="errors">
+    {% for error in form.options.errors %}
+    <li>{{ error }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  <label for="terms">Terms to test, separated by newlines </label>
+  <span class="toolrow">
+    Add terms:
+    <a href="#" onclick="addTerms({{ allterms|safe }}); return false;">[All original terms]</a> 
+    <a href="#" onclick="addTerms({{ inconclusiveterms|safe }}); return false;">[Inconclusive terms]</a>
+    <a href="#" onclick="clearTerms(); return false;">[Clear terms]</a>
+  </span>
+  <textarea class="xxlarge" id="terms" name="terms" rows="10"></textarea>
+  {% if form.terms.errors %}
+  <ul class="errors">
+    {% for error in form.terms.errors %}
+    <li>{{ error }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  {{ form.terms_per_quiz.label }}
+  {{ form.terms_per_quiz(class="span2") }}
+  {% if form.terms_per_quiz.errors %}
+  <ul class="errors">
+    {% for error in form.terms_per_quiz.errors %}
+    <li>{{ error }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  {{ form.reward.label }}
+  {{ form.reward(class="span2", value="%.2f"|format(original_campaign.reward_per_quiz)) }}
+  {% if form.reward.errors %}
+  <ul class="errors">
+    {% for error in form.reward.errors %}
+    <li>{{ error }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  {{ form.times_per_term.label }}
+  {{ form.times_per_term(class="span2") }}
+  {% if form.times_per_term.errors %}
+  <ul class="errors">
+    {% for error in form.times_per_term.errors %}
+    <li>{{ error }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  <br />
+  {{ form.csrf }}
+  <div class="well">
+    <input type="submit" class="btn primary" value="Create Campaign" />
+  </div>
+</form>
+{% endblock %}
+
