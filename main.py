@@ -20,7 +20,7 @@ def home():
     """
     Redirect all requests to the campaign list for now.
     """
-    return redirect(url_for('listcampaigns'))
+    return render_template('marketing.html')
 
 @app.route('/campaigns')
 def listcampaigns():
@@ -213,9 +213,8 @@ def fetchresults():
 
 
 
-
 ### Application settings ###
 app.secret_key = settings.APP_SECRET_KEY
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=settings.PORT)
