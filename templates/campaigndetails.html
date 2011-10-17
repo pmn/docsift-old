@@ -35,7 +35,7 @@
 </div>
 
 <div class="row">
-  <div class="span-one-third">
+  <div class="span5">
     <b>{{ campaign.options|count }} Possible answers:</b></br>
     <ul>
       {% for option in campaign.options %}
@@ -44,7 +44,7 @@
     </ul>
   </div>
 
-  <div class="span-two-thirds">
+  <div class="span11">
     <b>Terms:</b> 
     {% if campaign.job_generated == True %}
     (Download <a href="/campaigns/{{ campaign.id }}.csv">.csv</a> 
